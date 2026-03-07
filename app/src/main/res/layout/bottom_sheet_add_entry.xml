@@ -16,7 +16,9 @@
         <AutoCompleteTextView
             android:id="@+id/editDrugSheet"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
+            android:paddingVertical="12dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 

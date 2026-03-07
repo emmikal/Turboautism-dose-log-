@@ -12,8 +12,8 @@ android {
         applicationId = "com.example.turboautismdoselog"
         minSdk = 35
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3-alpha"
+        versionCode = 4
+        versionName = "0.4-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

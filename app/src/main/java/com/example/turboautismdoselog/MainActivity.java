@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
         field.setAdapter(adapter);
         field.setThreshold(1);
+        field.setOnClickListener(v -> field.showDropDown());
     }
 
     private void exportDatabaseToCSV() {
