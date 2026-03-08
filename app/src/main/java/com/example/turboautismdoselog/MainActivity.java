@@ -29,9 +29,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.List;
 import java.util.ArrayList;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    TextView emptyTitle;
+    TextView emptySubtitle;
     RecyclerView recyclerView;
     DrugAdapter adapter;
     AppDatabase db;
@@ -53,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
+        emptyTitle = findViewById(R.id.emptyTitle);
+        emptySubtitle = findViewById(R.id.emptySubtitle);
+
         // Floating action button
         FloatingActionButton fab = findViewById(R.id.fabAddEntry);
         fab.setOnClickListener(v -> openAddEntrySheet());
@@ -60,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
         // RecyclerView setup
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemAnimator(new androidx.recyclerview.widget.DefaultItemAnimator());
+
 
         // Database
         db = Room.databaseBuilder(
@@ -77,8 +85,25 @@ public class MainActivity extends AppCompatActivity {
 
         List<DrugEntry> entries = db.drugDao().getAll();
 
-        adapter = new DrugAdapter(entries, entry -> openEditEntrySheet(entry));
-        recyclerView.setAdapter(adapter);
+        if (entries.isEmpty()) {
+
+            emptyTitle.setVisibility(View.VISIBLE);
+            emptySubtitle.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+
+        } else {
+
+            emptyTitle.setVisibility(View.GONE);
+            emptySubtitle.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            if (adapter == null) {
+                adapter = new DrugAdapter(entries, entry -> openEditEntrySheet(entry));
+                recyclerView.setAdapter(adapter);
+            } else {
+                adapter.updateEntries(entries);
+            }
+        }
     }
 
     // Swipe to delete
@@ -153,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
             db.drugDao().insert(entry);
 
             refreshList();
+            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
             dialog.dismiss();
         });
 
