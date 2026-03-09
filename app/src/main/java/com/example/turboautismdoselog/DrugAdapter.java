@@ -78,4 +78,8 @@ public class DrugAdapter extends RecyclerView.Adapter<DrugAdapter.ViewHolder> {
             textTimestamp = itemView.findViewById(R.id.textTimestamp);
         }
     }
+    public void updateEntries(List<DrugEntry> newEntries) {
+        this.entries = newEntries;
+        notifyDataSetChanged();
+    }
 }

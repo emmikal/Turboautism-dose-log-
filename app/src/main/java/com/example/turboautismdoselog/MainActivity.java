@@ -3,11 +3,11 @@ package com.example.turboautismdoselog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.room.Room;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.snackbar.Snackbar;
 
 import android.os.Environment;
 
@@ -33,17 +33,19 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    RecyclerView recyclerView;
-    DrugAdapter adapter;
-    AppDatabase db;
+    private RecyclerView recyclerView;
+    private DrugAdapter adapter;
+    private AppDatabase db;
+
+    private View emptyState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Toolbar export menu
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+
         toolbar.setOnMenuItemClickListener(item -> {
 
             if (item.getItemId() == R.id.action_export) {
@@ -59,15 +61,14 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Floating action button
         FloatingActionButton fab = findViewById(R.id.fabAddEntry);
         fab.setOnClickListener(v -> openAddEntrySheet());
 
-        // RecyclerView setup
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Database
+        emptyState = findViewById(R.id.emptyState);
+
         db = Room.databaseBuilder(
                 getApplicationContext(),
                 AppDatabase.class,
@@ -78,16 +79,32 @@ public class MainActivity extends AppCompatActivity {
         setupSwipeDelete();
     }
 
-    // Refresh RecyclerView
     private void refreshList() {
 
         List<DrugEntry> entries = db.drugDao().getAll();
 
-        adapter = new DrugAdapter(entries, entry -> openEditEntrySheet(entry));
-        recyclerView.setAdapter(adapter);
+        if (entries.isEmpty()) {
+
+            emptyState.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+
+        } else {
+
+            emptyState.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            if (adapter == null) {
+
+                adapter = new DrugAdapter(entries, entry -> openEditEntrySheet(entry));
+                recyclerView.setAdapter(adapter);
+
+            } else {
+
+                adapter.updateEntries(entries);
+            }
+        }
     }
 
-    // Swipe to delete
     private void setupSwipeDelete() {
 
         ItemTouchHelper.SimpleCallback swipeHandler =
@@ -125,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
         new ItemTouchHelper(swipeHandler).attachToRecyclerView(recyclerView);
     }
 
-    // Add new entry bottom sheet
     private void openAddEntrySheet() {
 
         BottomSheetDialog dialog = new BottomSheetDialog(this);
@@ -165,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // Edit entry bottom sheet
     private void openEditEntrySheet(DrugEntry entry) {
 
         BottomSheetDialog dialog = new BottomSheetDialog(this);
@@ -198,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // Drug autocomplete
     private void setupDrugAutocomplete(AutoCompleteTextView field) {
 
         List<DrugEntry> entries = db.drugDao().getAll();
@@ -223,7 +237,6 @@ public class MainActivity extends AppCompatActivity {
         field.setOnClickListener(v -> field.showDropDown());
     }
 
-    // CSV export
     private void exportDatabaseToCSV() {
 
         List<DrugEntry> entries = db.drugDao().getAll();
