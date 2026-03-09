@@ -1,6 +1,7 @@
 package com.example.turboautismdoselog;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,8 @@ public class StatisticsActivity extends AppCompatActivity {
     private TextView statMostUsedDrug;
     private TextView statLastDose;
     private TextView statAvgPerDay;
+    private View emptyState;
+    private View statisticsContent;
 
     private AppDatabase db;
 
@@ -30,6 +33,8 @@ public class StatisticsActivity extends AppCompatActivity {
         statMostUsedDrug = findViewById(R.id.statMostUsedDrug);
         statLastDose = findViewById(R.id.statLastDose);
         statAvgPerDay = findViewById(R.id.statAvgPerDay);
+        emptyState = findViewById(R.id.emptyState);
+        statisticsContent = findViewById(R.id.statisticsContent);
 
         db = Room.databaseBuilder(
                 getApplicationContext(),
@@ -46,6 +51,18 @@ public class StatisticsActivity extends AppCompatActivity {
 
         // Total entries
         statTotalEntries.setText(String.valueOf(entries.size()));
+
+        if (entries.isEmpty()) {
+
+            emptyState.setVisibility(View.VISIBLE);
+            statisticsContent.setVisibility(View.GONE);
+            return;
+
+        } else {
+
+            emptyState.setVisibility(View.GONE);
+            statisticsContent.setVisibility(View.VISIBLE);
+        }
 
         if (entries.isEmpty()) {
             statMostUsedDrug.setText("—");
