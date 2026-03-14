@@ -1,5 +1,6 @@
 package com.example.turboautismdoselog;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,6 @@ public class DrugAdapter extends RecyclerView.Adapter<DrugAdapter.ViewHolder> {
     private List<DrugEntry> entries;
     private OnItemLongClickListener listener;
 
-    // Interface for long press editing
     public interface OnItemLongClickListener {
         void onItemLongClick(DrugEntry entry);
     }
@@ -25,6 +25,23 @@ public class DrugAdapter extends RecyclerView.Adapter<DrugAdapter.ViewHolder> {
     public DrugAdapter(List<DrugEntry> entries, OnItemLongClickListener listener) {
         this.entries = entries;
         this.listener = listener;
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        TextView drug;
+        TextView route;
+        TextView dosage;
+        TextView timestamp;
+
+        public ViewHolder(View view) {
+            super(view);
+
+            drug = view.findViewById(R.id.textDrug);
+            route = view.findViewById(R.id.textRoute);
+            dosage = view.findViewById(R.id.textDosage);
+            timestamp = view.findViewById(R.id.textTimestamp);
+        }
     }
 
     @Override
@@ -41,16 +58,29 @@ public class DrugAdapter extends RecyclerView.Adapter<DrugAdapter.ViewHolder> {
 
         DrugEntry entry = entries.get(position);
 
-        holder.textDrug.setText(entry.drug);
-        holder.textRoute.setText("Route: " + entry.route);
-        holder.textDosage.setText("Dosage: " + entry.dosage);
+        holder.drug.setText(entry.drug);
+        holder.route.setText(entry.route);
+        holder.dosage.setText(entry.dosage);
 
-        // Format timestamp
         Date date = new Date(entry.timestamp);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        holder.textTimestamp.setText(sdf.format(date));
 
-        // Long press → edit entry
+        SimpleDateFormat sdf =
+                new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+
+        holder.timestamp.setText(sdf.format(date));
+
+        // Tap drug name → open statistics
+
+        holder.drug.setOnClickListener(v -> {
+
+            Intent intent = new Intent(v.getContext(), DrugStatisticsActivity.class);
+            intent.putExtra("drug", entry.drug);
+            v.getContext().startActivity(intent);
+
+        });
+
+        // Long press row → edit entry
+
         holder.itemView.setOnLongClickListener(v -> {
             listener.onItemLongClick(entry);
             return true;
@@ -62,22 +92,6 @@ public class DrugAdapter extends RecyclerView.Adapter<DrugAdapter.ViewHolder> {
         return entries.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        TextView textDrug;
-        TextView textRoute;
-        TextView textDosage;
-        TextView textTimestamp;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            textDrug = itemView.findViewById(R.id.textDrug);
-            textRoute = itemView.findViewById(R.id.textRoute);
-            textDosage = itemView.findViewById(R.id.textDosage);
-            textTimestamp = itemView.findViewById(R.id.textTimestamp);
-        }
-    }
     public void updateEntries(List<DrugEntry> newEntries) {
         this.entries = newEntries;
         notifyDataSetChanged();

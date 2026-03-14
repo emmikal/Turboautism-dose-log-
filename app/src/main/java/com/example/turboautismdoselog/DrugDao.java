@@ -33,4 +33,7 @@ public interface DrugDao {
                     "ORDER BY total DESC"
     )
     List<DrugStats> getDrugStats();
+
+    @Query("SELECT * FROM DrugEntry WHERE drug = :drug ORDER BY timestamp DESC")
+    List<DrugEntry> getEntriesForDrug(String drug);
 }
