@@ -69,17 +69,13 @@ public class DrugAdapter extends RecyclerView.Adapter<DrugAdapter.ViewHolder> {
 
         holder.timestamp.setText(sdf.format(date));
 
-        // Tap drug name → open statistics
-
-        holder.drug.setOnClickListener(v -> {
+        holder.itemView.setOnClickListener(v -> {
 
             Intent intent = new Intent(v.getContext(), DrugStatisticsActivity.class);
             intent.putExtra("drug", entry.drug);
             v.getContext().startActivity(intent);
 
         });
-
-        // Long press row → edit entry
 
         holder.itemView.setOnLongClickListener(v -> {
             listener.onItemLongClick(entry);
